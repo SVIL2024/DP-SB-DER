@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments & caches
+.venv/
+venv/
+.cache/
+.tools/
+tmp/
+_tmp/
+
+# Checkpoints, datasets, logs, and local outputs
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+*.zip
+*.tar
+*.tar.gz
+*.sha256
+ckpts/
+runs/
+logs/
+outputs/
+wandb/
+data/PreVAD/
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+.env

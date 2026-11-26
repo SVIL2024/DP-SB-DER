@@ -1,0 +1,158 @@
+seed_everything: 2024
+save_epochs:
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
+- 23
+- 24
+- 25
+- 26
+- 27
+- 28
+- 29
+- 30
+- 31
+- 32
+- 33
+- 34
+- 35
+- 36
+- 37
+- 38
+- 39
+- 40
+trainer:
+  max_epochs: 40
+  precision: 32
+  gradient_checkpointing: true
+  log_every_n_steps: 20
+model:
+  class_path: models.LaGoVAD.LaGoVADLightModel
+  init_args:
+    model_config:
+      class_path: models.LaGoVAD.LaGoVADModelConfig
+      init_args:
+        clip_name: openai/clip-vit-base-patch16
+        hidden_size: 512
+        num_soft_prompts: 32
+        verbalizer_type: null
+        temp_enc_type: RoFormer
+        temp_gate: null
+        temp_encoder_layers: 2
+        temp_attention_heads: 4
+        temp_window_size: 25
+        fusion_type: co_attn
+        fusion_num_layers: 2
+        head_num_layers: 1
+        head_activation: gelu
+        head_norm: layernorm
+        head_kernel_size: 9
+        multi_head_type: sim
+        bin_head_type: adaptive
+        pretrained_weight_path: null
+        use_text_projection: false
+        use_semantic_beamformer: true
+        beam_num_heads: 4
+        beam_head_dim: 64
+        beam_diag_load_init: 0.1
+        beam_num_stages: 2
+        beam_shrinkage_override: null
+        beam_dual_scale_window: 0
+        beam_use_rx_energy: true
+        beam_clip_aware_train: true
+        beam_init_scale: 0.0
+        beam_bin_scale_override: null
+        beam_use_ema_prior: true
+        beam_ema_momentum: 0.04
+        beam_monotonic_glrt: false
+        beam_rx_scale_override: null
+        beam_gamma_min: 0.75
+        beam_gamma_max: 0.92
+        beam_gamma_rand_prob: 0.0
+        beam_dual_prior: true
+        beam_inject_sim: false
+        beam_global_scale_init: 0.4
+        beam_local_scale_init: 0.35
+        beam_global_scale_override: null
+        beam_local_scale_override: null
+        beam_local_gamma_override: null
+        beam_decoupled: false
+        beam_local_rx_only: true
+        beam_use_diff_steering: true
+        beam_disable_cfar_gate: false
+        bin_head_multiscale: false
+    training_config:
+      class_path: models.LaGoVAD.LaGoVADTrainingConfig
+      init_args:
+        lr: 5.0e-05
+        weight_decay: 0.0
+        lr_scheduler_name: cosine
+        lr_scheduler_kwargs:
+          num_warmup_steps: 20
+        mil_topk_pct: 16
+        sup_mil_topk_pct: 4
+        mul_mil_topk_pct: 16
+        mul_weight: 1.0
+        smooth_reg_weight: 0.0
+        sparsity_reg_weight: 0.0
+        mul_sparsity_reg_weight: 0.0
+        pseudo_sup_weight: 1.0
+        pseudo_sup_mil_weight: 1.0
+        anomaly_cap_contrastive_weight: 1.0
+        contrastive_neg_mining: n3
+        contrastive_temp: 0.02
+        anomaly_cap_forward: true
+        score_type: binary
+        mul_score_type: vanilla
+        mul_mil_type: v1
+        temp_gate_init: 0.0
+        save_res_mode: fix10
+        beam_mask_reg_weight: 0.15
+        beam_aux_weight: 0.5
+        beam_lr_mult: 4.0
+        fix_contrastive_norm: false
+        frame_time:
+        - 8
+        - 8
+        - 8
+        - 8
+        - 2
+        - 1
+        - 8
+        - 8
+data:
+  class_path: datasets.PreVADDataModule
+  init_args:
+    train_data_root: data/PreVAD
+    val_data_root: data/PreVAD
+    batch_size: 128
+    heuristic_synthesis: false
+    enhance_single_clip_factor: 0.3
+    random_crop_normal: true
+    syn_max_num_clips: 5
+    vis_max_len: 512
+    eval_datasets: ''
+    retrieval_based_synthesis: true
+    retrieval_cache: v6/train_search_cache.json
+    preload_features: true
+    num_workers: 0
+    val_num_workers: 0
