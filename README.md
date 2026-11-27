@@ -3,6 +3,11 @@
 # Dual-Prior Semantic Beamforming: Parameter-Free Differential-Entropy Routing for Open-World Video Anomaly Detection
 
 <p align="center">
+  <b>Shilong Du</b><sup>1</sup>, <b>Shifeng Li</b><sup>1,*</sup>, <b>Drukdron Tsomo</b><sup>2</sup>, <b>Zhenshuo Chen</b><sup>1</sup>, and <b>Yuhang Xie</b><sup>1</sup><br>
+  <sup>1</sup>Bohai University &nbsp;&nbsp;&middot;&nbsp;&nbsp; <sup>2</sup>Minzu University of China &nbsp;&nbsp;&middot;&nbsp;&nbsp; <sup>*</sup>Corresponding Author
+</p>
+
+<p align="center">
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-%E2%89%A52.4-EE4C2C.svg?logo=pytorch&logoColor=white" alt="PyTorch"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
   <a href="#-model-zoo--pretrained-weights"><img src="https://img.shields.io/badge/Weights-Quark_Drive-1E88E5.svg" alt="Pretrained Weights"></a>
@@ -29,7 +34,7 @@ Official PyTorch implementation of **DP-SB + DER** (*Dual-Prior Semantic Beamfor
 <p align="center">
   <img src="./assets/fig_method_overview.png" width="98%" alt="Architecture of DP-SB + DER">
   <br>
-  <em><b>Figure 1. Architecture of DP-SB + DER.</b> Attaching to a language-guided VAD backbone with +330K trainable parameters (+1.74%; +0 extra for DER), DP-SB couples a Global Manifold Branch (H<sub>0</sub><sup>global</sup>) and a Local Clutter-Nulling Branch (H<sub>0</sub><sup>local</sup>) in M=4 hypersphere subspaces (d<sub>h</sub>=64), routed per video via parameter-free Cholesky differential-entropy gain w<sub>L</sub>(V)=&sigma;(&Delta;H(V)).</em>
+  <em><b>Architecture Overview (Paper Fig. 2).</b> Attaching to a language-guided VAD backbone with +330K trainable parameters (+1.74%; +0 extra for DER), DP-SB couples a Global Manifold Branch (H<sub>0</sub><sup>global</sup>) and a Local Clutter-Nulling Branch (H<sub>0</sub><sup>local</sup>) in M=4 &ell;<sub>2</sub>-normalized subspaces (d<sub>h</sub>=64), routed per video via parameter-free Cholesky differential-entropy gain w<sub>L</sub>(V)=&sigma;(&Delta;H(V)) (with global weight w<sub>G</sub>=1&minus;w<sub>L</sub>).</em>
 </p>
 
 ---
@@ -40,16 +45,16 @@ Official PyTorch implementation of **DP-SB + DER** (*Dual-Prior Semantic Beamfor
 - **Parameter-Free Differential-Entropy Routing (DER):** Reuses the Cholesky diagonals $(\mathbf{L}_{G,m}, \mathbf{L}_{L,m}(V))$ already computed by both branches with **zero extra parameters** and **+0.004 ms/clip** batched overhead, computing exact per-video Gaussian differential entropy gain $\Delta H(V)$ at the theoretical volume-equilibrium point ($c_0 = 0, \tau_{\mathrm{der}} = 1.0$) with a single PreVAD-train variance-equalization constant ($\rho_0 = 5.0$). Without per-dataset weight tuning or domain labels, DER automatically routes multi-shot streams (XD-Violence: $\bar{w}_L = 0.21$) toward global whitening and structured surveillance/dashcam feeds (MSAD/DoTA: $\bar{w}_L = 1.00$) toward local clutter nulling.
 - **Strong Cross-Domain, Zero-Leakage, and Definition-Drift Performance:**
   - **Protocol 1 (8 Benchmarks, No Per-Dataset Weight Tuning):** Default Plug-in DP-SB + DER reaches **77.97%** 7-zero-shot mean and **77.22%** 8-dataset mean (**+1.61%** over published LaGoVAD, **+0.94%** over reproduced LaGoVAD, **+0.78%** over the best constant mixing ratio), with **+4.13%** on ego-motion dashcams (**DoTA 66.73%**).
-  - **Strict Zero-Leakage Single-Checkpoint Audit (PreVAD-Best):** Plug-in DP-SB + DER (`ep08`) achieves **75.52% 7-ZS / 75.08% 8-DS** (**+1.73% / +1.66%** over reproduced LaGoVAD `ep26`, winning 7/8 datasets, and **+0.48%** over official `best.ckpt`).
+  - **Strict Zero-Leakage Single-Checkpoint Audit (PreVAD-Best):** Plug-in DP-SB + DER (epoch 8) achieves **75.52% 7-ZS / 75.08% 8-DS** (**+1.73% / +1.66%** over reproduced LaGoVAD at epoch 26, winning 7/8 datasets, and **+0.48%** over the released official model at epoch 11).
   - **Protocol 2 (`drift@5` Open-World Definition Drift):** Achieves **86.83% Mean AUC / 42.00% Mean AP** on the published subsets in Appendix Table D of LaGoVAD (outperforming 7B MLLMs such as Qwen2.5-VL-7B by >20 AP points at **+0.22 ms/clip** batched overhead) and lifts same-video paired exclusion drop $\overline{\Delta}_{\mathrm{flip}}$ on XD-Violence from `−0.0056` to **`+0.0195`** ($p = 2.2 \times 10^{-34}$).
 
 <details>
-<summary><b>📐 Geometric Motivation (Click to expand Figure 2)</b></summary>
+<summary><b>📐 Geometric Motivation (Click to expand Paper Fig. 1)</b></summary>
 <br>
 <p align="center">
   <img src="./assets/fig_intro_motivation.png" width="96%" alt="Geometric motivation of DP-SB + DER">
   <br>
-  <em><b>Figure 2. Geometric Motivation.</b> (a) Unwhitened scoring suffers from anisotropic camera clutter and shared cross-modal offset &Delta;<sub>gap</sub>. (b) Cholesky whitening and differential steering cancel &Delta;<sub>gap</sub> along an orthogonal matched hyperplane (Branch G) and radial Mahalanobis contour (Branch L). (c) Parameter-free DER routes multi-shot and single-camera regimes per clip without weight tuning.</em>
+  <em><b>Geometric Motivation (Paper Fig. 1).</b> (a) Unwhitened scoring suffers from anisotropic camera clutter and shared cross-modal offset &Delta;<sub>gap</sub>. (b) Cholesky whitening and differential steering cancel &Delta;<sub>gap</sub> along an orthogonal matched hyperplane (Branch G) and radial Mahalanobis contour (Branch L). (c) Parameter-free DER routes multi-shot and single-camera regimes per clip via w<sub>L</sub>(V)=&sigma;(&Delta;H(V)) without per-dataset weight tuning.</em>
 </p>
 </details>
 
@@ -59,7 +64,7 @@ Official PyTorch implementation of **DP-SB + DER** (*Dual-Prior Semantic Beamfor
 
 - [x] Core DP-SB + Parameter-Free DER module (`src/models/LaGoVAD/beamformer.py`)
 - [x] Deterministic training configs & runner (Plug-in, End-to-End, Baseline, Ablations)
-- [x] Official Protocol 1 (8-benchmark & zero-leakage single-ckpt), Protocol 2 (`drift@5`), and Operating-Point FPR/FNR & Efficiency scripts
+- [x] Official Protocol 1 (8-benchmark & zero-leakage single-checkpoint), Protocol 2 (`drift@5`), and Operating-Point FPR/FNR & Efficiency scripts
 - [x] Self-contained unit & theoretical-property tests verifying Propositions 1–3 (`tests/test_dpsb_der.py`)
 - [x] Pretrained checkpoints & evaluation configs ([Quark Drive](#-model-zoo--pretrained-weights))
 
@@ -108,9 +113,9 @@ unzip dpsb_der_weights.zip -d ckpts/
 ```text
 ckpts/dpsb_der_weights/
 ├── 1_dpsb_der_plugin_default/              # Default Plug-in DP-SB + DER (Table I, II, III, IV)
-│   ├── config_der_ctr_gate.yaml            # Parameter-free DER (c0=0, tau_der=1, rho0=5.0, ctr+gate)
-│   ├── config_der_ctr_nogate.yaml          # Table III / IV(a) ablation: ctr, no-gate
-│   ├── config_der_raw_nogate.yaml          # Table III ablation: raw, no-gate
+│   ├── config_der_ctr_gate.yaml            # Parameter-free DER (c0=0, tau_der=1, rho0=5.0, Centered + Gated)
+│   ├── config_der_ctr_nogate.yaml          # Table III / IV(a) ablation: Centered, No Gate
+│   ├── config_der_raw_nogate.yaml          # Table III ablation: Uncentered, No Gate
 │   ├── dpsb_plugin_ep08_prevad_best.ckpt   # Strict Zero-Leakage PreVAD-Best (75.52% 7-ZS / 75.08% 8-DS)
 │   ├── dpsb_plugin_ep40_final.ckpt         # Final Epoch 40 (74.51% 7-ZS / 73.91% 8-DS)
 │   └── dpsb_plugin_ep{01,02,04,06,07,19,20}_*.ckpt
@@ -127,7 +132,7 @@ ckpts/dpsb_der_weights/
 ├── 4_ablations_retrained/                  # Table IV(b) From-Scratch Retraining Ablations
 │   ├── no_diff_steering/                   # w/o Differential Steering (d_c - mu_0)
 │   └── single_stage_mask/                  # w/o 2-Stage IR-MVDR (1-Stage Mask)
-├── 5_lagovad_official_ref/                 # Reference Official LaGoVAD Checkpoint (ep11)
+├── 5_lagovad_official_ref/                 # Reference Official Released LaGoVAD Model (epoch 11)
 └── WEIGHTS_MANIFEST.md
 ```
 
@@ -205,10 +210,10 @@ python scripts/train.py --config configs/ablation_stage1_mask.yaml   --data-root
 
 ### 2. Protocol 1: Eight-Benchmark Evaluation & Zero-Leakage Audit (Table I & Table IV)
 
-All Protocol 1 evaluations call the untouched official scripts (`src/full_length_eval.py` and `src/full_length_eval_dota.py`) under one shared parameter-free DER rule (`c0=0, tau_der=1.0, rho0=5.0, ctr+gate`):
+All Protocol 1 evaluations call the untouched official scripts (`src/full_length_eval.py` and `src/full_length_eval_dota.py`) under one shared parameter-free DER rule ($c_0 = 0, \tau_{\mathrm{der}} = 1.0, \rho_0 = 5.0$, Centered + Gated):
 
 ```bash
-# Strict Zero-Leakage Single-Checkpoint Audit (Plug-in PreVAD-Best ep08 -> 75.52% 7-ZS / 75.08% 8-DS)
+# Strict Zero-Leakage Single-Checkpoint Audit (Plug-in PreVAD-Best, epoch 8 -> 75.52% 7-ZS / 75.08% 8-DS)
 python scripts/eval_protocol1.py \
   --config configs/dpsb_der_eval_plugin.yaml \
   --ckpt ckpts/dpsb_der_weights/1_dpsb_der_plugin_default/dpsb_plugin_ep08_prevad_best.ckpt \
@@ -216,7 +221,7 @@ python scripts/eval_protocol1.py \
   --der \
   --out-dir outputs/zero_leakage_plugin_ep08
 
-# Strict Zero-Leakage Single-Checkpoint Audit (End-to-End PreVAD-Best ep26 -> 74.98% 7-ZS / 74.66% 8-DS)
+# Strict Zero-Leakage Single-Checkpoint Audit (End-to-End PreVAD-Best, epoch 26 -> 74.98% 7-ZS / 74.66% 8-DS)
 python scripts/eval_protocol1.py \
   --config configs/dpsb_der_eval_e2e.yaml \
   --ckpt ckpts/dpsb_der_weights/2_dpsb_der_end2end/dpsb_e2e_ep26_prevad_best.ckpt \
@@ -233,7 +238,7 @@ PYTHONPATH=.:src python src/full_length_eval_dota.py \
 ```
 
 Controlled single-scale ablations (Table IV(a)) run on identical checkpoints by switching flags on `scripts/eval_protocol1.py`:
-`--backbone-only` ($\Delta\mathbf{b} = \mathbf{0}$), `--fixed-wl 0.0` (Branch G only), `--fixed-wl 0.50` (Equal), `--fixed-wl 0.85` (Best Constant), `--fixed-wl 1.0` (Branch L only), `--disable-gate` (`ctr, no-gate`), or `--no-center-local --disable-gate` (`raw, no-gate`).
+`--backbone-only` ($\Delta\mathbf{b} = \mathbf{0}$), `--fixed-wl 0.0` (Branch G only, $w_G = 1, w_L = 0$), `--fixed-wl 0.50` (Equal), `--fixed-wl 0.85` (Best Constant), `--fixed-wl 1.0` (Branch L only), `--disable-gate` (Centered, No Gate), or `--no-center-local --disable-gate` (Uncentered, No Gate).
 
 ### 3. Protocol 2: Open-World Definition Drift (`drift@5`, Table II)
 
@@ -257,7 +262,7 @@ python scripts/eval_protocol2_drift5.py \
   --out-json outputs/protocol2_paired_5ds.json
 ```
 
-Add `--branch-g-only` to run the pure semantic Branch G ($w_L = 0$) diagnostic.
+Add `--branch-g-only` to run the pure semantic Branch G ($w_G = 1, w_L = 0$) diagnostic.
 
 ### 4. Operating-Point FPR/FNR & Efficiency Audit (Table III & Table V)
 
@@ -286,10 +291,10 @@ Metrics report frame-level **AP (%)** on PreVAD / XD-Violence and **ROC-AUC (%)*
 | **DP-SB + DER (End-to-End)** | **72.35** | **76.67** | **81.57** | **91.42** | 61.27 | 65.04 | 85.17 | **82.72** | 77.69 | 77.03 |
 | **DP-SB + DER (Plug-in, Default)** | 71.98 | 76.05 | 80.61 | 91.36 | 61.77 | **66.73** | **87.21** | 82.05 | **77.97** | **77.22** |
 | *Zero-Leakage PreVAD-Best Single Checkpoint:* | | | | | | | | | | |
-| LaGoVAD (Official `best.ckpt`, ep11) | 69.73 | 74.05 | 81.13 | 90.51 | 58.66 | 62.64 | 80.04 | 80.00 | 75.29 | 74.60 |
-| LaGoVAD† (Reproduced, ep26) | 70.79 | 66.94 | 77.31 | 89.73 | 61.38 | 61.40 | 79.79 | 79.98 | 73.79 | 73.42 |
-| **DP-SB + DER (End-to-End, ep26)** | 72.35 | 73.87 | 77.91 | 90.50 | 60.18 | 62.66 | 79.87 | 79.90 | 74.98 | 74.66 |
-| **DP-SB + DER (Plug-in, ep08)** | 71.98 | 70.61 | 79.75 | 90.86 | 58.24 | 63.15 | 85.17 | 80.85 | **75.52** | **75.08** |
+| LaGoVAD (Official Released, epoch 11) | 69.73 | 74.05 | 81.13 | 90.51 | 58.66 | 62.64 | 80.04 | 80.00 | 75.29 | 74.60 |
+| LaGoVAD† (Reproduced, epoch 26) | 70.79 | 66.94 | 77.31 | 89.73 | 61.38 | 61.40 | 79.79 | 79.98 | 73.79 | 73.42 |
+| **DP-SB + DER (End-to-End, epoch 26)** | 72.35 | 73.87 | 77.91 | 90.50 | 60.18 | 62.66 | 79.87 | 79.90 | 74.98 | 74.66 |
+| **DP-SB + DER (Plug-in, epoch 8)** | 71.98 | 70.61 | 79.75 | 90.86 | 58.24 | 63.15 | 85.17 | 80.85 | **75.52** | **75.08** |
 
 ### Protocol 2: Open-World Definition Drift (`drift@5`, Table II(a))
 
@@ -304,7 +309,7 @@ Evaluated on the exact published anomaly subsets in Appendix Table D of LaGoVAD:
 | LaGoVAD† (Reproduced) | 18.9M | 86.90 | 40.62 | 85.86 | **40.32** | 86.38 | 40.47 |
 | **DP-SB + DER (End-to-End)** | 19.3M (+330K) | 87.32 | 42.58 | **86.18** | 39.64 | 86.75 | 41.11 |
 | **DP-SB + DER (Plug-in, Default)** | 19.3M (+330K) | **87.47** | **44.48** | **86.18** | 39.52 | **86.83** | **42.00** |
-| *DP-SB Branch G Only ($w_L = 0$)* | *Diagnostic* | *87.85* | *45.39* | *85.99* | *41.24* | *86.92* | *43.32* |
+| *DP-SB Branch G Only ($w_G = 1, w_L = 0$)* | *Diagnostic* | *87.85* | *45.39* | *85.99* | *41.24* | *86.92* | *43.32* |
 
 ### Computational Efficiency (Table V, RTX 3090 Ti, $T = 512, C = 14$)
 
@@ -321,8 +326,8 @@ Evaluated on the exact published anomaly subsets in Appendix Table D of LaGoVAD:
 ```text
 DP-SB-DER/
 ├── assets/
-│   ├── fig_method_overview.png       # Main architecture diagram (Figure 1)
-│   └── fig_intro_motivation.png      # Geometric motivation & DER curve (Figure 2)
+│   ├── fig_method_overview.png       # Architecture overview (Paper Fig. 2)
+│   └── fig_intro_motivation.png      # Geometric motivation & DER curve (Paper Fig. 1)
 ├── configs/
 │   ├── dpsb_plugin_train.yaml        # Default Plug-in DP-SB training (stop-gradient decoupled)
 │   ├── dpsb_e2e_train.yaml           # End-to-End DP-SB training
@@ -357,17 +362,17 @@ DP-SB-DER/
 If you find this repository helpful in your research, please consider citing our paper and the LaGoVAD/PreVAD benchmark:
 
 ```bibtex
-@article{dpsb_der_2026,
+@article{du2026dpsbder,
   title={Dual-Prior Semantic Beamforming: Parameter-Free Differential-Entropy Routing for Open-World Video Anomaly Detection},
-  author={Anonymous Author(s)},
-  journal={Under Review},
+  author={Du, Shilong and Li, Shifeng and Tsomo, Drukdron and Chen, Zhenshuo and Xie, Yuhang},
+  journal={IEEE Transactions on Circuits and Systems for Video Technology (Under Review)},
   year={2026}
 }
 
 @inproceedings{liu2026lagovad,
   title={Language-guided Open-world Video Anomaly Detection under Weak Supervision},
   author={Liu, Zihao and Wu, Xiaoyu and Wu, Jianqin and Wang, Xuxu and Yang, Linlin},
-  booktitle={Proceedings of the International Conference on Learning Representations (ICLR)},
+  booktitle={Proc. Int. Conf. Learn. Represent. (ICLR)},
   year={2026}
 }
 ```
